@@ -1,1 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0d1117">
+<title>Life — Get a grip</title>
+<style>
+  :root{
+    --bg:#0d1117; --card:#161b22; --card2:#1c2330; --line:#2a3240;
+    --text:#e6edf3; --muted:#8b949e; --accent:#5eead4; --accent2:#38bdf8;
+    --easy:#4ade80; --medium:#facc15; --hard:#f87171; --radius:16px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,sans-serif;min-height:100vh;line-height:1.45}
+  .wrap{max-width:560px;margin:0 auto;padding:20px 16px 110px}
+  header.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:24px;letter-spacing:-.5px}
+  .logo .dot{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--accent),var(--accent2))}
+  .muted{color:var(--muted)} .small{font-size:13px}
+  h2{font-size:20px;margin-bottom:12px;letter-spacing:-.3px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
+  button{font:inherit;cursor:pointer;border:none;color:inherit;background:none}
+  .btn{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#04211d;font-weight:700;padding:14px 18px;border-radius:14px;width:100%;font-size:16px}
+  .btn:disabled{opacity:.4}
+  .btn.ghost{background:var(--card2);color:var(--text);border:1px solid var(--line)}
+  .btn.danger{background:transparent;color:var(--hard);border:1px solid #4b2626}
+  .icon-btn{width:40px;height:40px;border-radius:12px;background:var(--card2);border:1px solid var(--line);display:grid;place-items:center;font-size:20px}
+  .fab{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);width:calc(100% - 32px);max-width:528px;box-shadow:0 10px 30px rgba(94,234,212,.25)}
+  input,textarea{width:100%;font:inherit;color:var(--text);background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:14px;font-size:16px;outline:none}
+  input:focus{border-color:var(--accent)}
+  label.lbl{display:block;font-size:13px;color:var(--muted);margin:18px 0 8px;font-weight:600;text-transform:uppercase;letter-spacing:.6px}
+  .hidden{display:none!important}
 
+  /* summary */
+  .summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:22px}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;text-align:center}
+  .stat b{display:block;font-size:22px}
+  .stat span{font-size:12px;color:var(--muted)}
+
+  /* goal cards */
+  .goal{display:flex;gap:14px;align-items:center;margin-bottom:12px;cursor:pointer;transition:transform .15s}
+  .goal:active{transform:scale(.98)}
+  .goal .emoji{font-size:28px;width:48px;height:48px;border-radius:14px;background:var(--card2);display:grid;place-items:center;flex-shrink:0}
+  .goal .info{flex:1;min-width:0}
+  .goal .name{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .bar{height:8px;background:var(--card2);border-radius:99px;overflow:hidden;margin-top:8px}
+  .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:99px;transition:width .4s}
+  .pill{display:inline-block;font-size:11px;font-weight:700;padding:3px 8px;border-radius:99px;text-transform:uppercase;letter-spacing:.5px}
+  .pill.easy{background:#14301f;color:var(--easy)} .pill.medium{background:#332b0c;color:var(--medium)} .pill.hard{background:#3a1717;color:var(--hard)}
+  .pill.ok{background:#14301f;color:var(--easy)} .pill.behind{background:#3a1717;color:var(--hard)} .pill.ahead{background:#0f2a3a;color:var(--accent2)} .pill.done{background:#14301f;color:var(--easy)}
+  .empty{text-align:center;padding:40px 20px}
+  .empty .big{font-size:48px;margin-bottom:10px}
+
+  /* suggestions */
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .chip{background:var(--card2);border:1px solid var(--line);padding:8px 12px;border-radius:99px;font-size:14px}
+  .chip:active,.chip.sel{border-color:var(--accent);color:var(--accent)}
+  .sugg-title{font-size:13px;color:var(--muted);margin-top:14px}
+
+  /* difficulty */
+  .levels{display:grid;gap:10px}
+  .level{text-align:left;background:var(--card2);border:2px solid var(--line);border-radius:14px;padding:14px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+  .level.sel.easy{border-color:var(--easy)} .level.sel.medium{border-color:var(--medium)} .level.sel.hard{border-color:var(--hard)}
+  .level .t{font-weight:800;font-size:16px}
+  .level .d{font-size:13px;color:var(--muted)}
+  .level .w{text-align:right;font-weight:800;font-size:18px;white-space:nowrap}
+  .level .w small{display:block;font-size:12px;color:var(--muted);font-weight:500}
+
+  /* preview */
+  .preview li{list-style:none;padding:8px 0;border-bottom:1px dashed var(--line);font-size:14px;display:flex;justify-content:space-between;gap:8px}
+  .preview li:last-child{border:none}
+
+  /* detail */
+  .detail-head{display:flex;gap:14px;align-items:center;margin-bottom:18px}
+  .ring{position:relative;width:96px;height:96px;flex-shrink:0}
+  .ring svg{transform:rotate(-90deg)}
+  .ring .pct{position:absolute;inset:0;display:grid;place-items:center;font-weight:800;font-size:22px}
+  .meta{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0 24px}
+  .meta div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}
+  .meta b{display:block;font-size:17px} .meta span{font-size:11px;color:var(--muted)}
+  .paceline{margin:-10px 0 22px}
+  .paceline .track{position:relative;height:10px;background:var(--card2);border-radius:99px}
+  .paceline .fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:99px}
+  .paceline .today{position:absolute;top:-5px;width:3px;height:20px;background:var(--text);border-radius:2px}
+  .paceline .legend{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:6px}
+
+  /* timeline */
+  .timeline{position:relative;padding-left:26px}
+  .timeline:before{content:"";position:absolute;left:9px;top:6px;bottom:6px;width:2px;background:var(--line)}
+  .week{position:relative;margin-bottom:16px}
+  .week .node{position:absolute;left:-26px;top:16px;width:20px;height:20px;border-radius:50%;background:var(--bg);border:2px solid var(--line);display:grid;place-items:center;font-size:11px}
+  .week.complete .node{background:var(--easy);border-color:var(--easy);color:#04211d}
+  .week.current .node{border-color:var(--accent);box-shadow:0 0 0 5px rgba(94,234,212,.15)}
+  .week.current .card{border-color:var(--accent)}
+  .week.future .card{opacity:.75}
+  .week .whead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:4px}
+  .week .wtitle{font-weight:700}
+  .phase{font-size:12px;color:var(--accent);font-weight:600;margin-bottom:8px}
+  .task{display:flex;gap:12px;align-items:flex-start;padding:9px 0;border-top:1px solid var(--line);cursor:pointer}
+  .task .box{width:22px;height:22px;border-radius:7px;border:2px solid var(--muted);flex-shrink:0;display:grid;place-items:center;font-size:13px;margin-top:1px;transition:.15s}
+  .task.done .box{background:var(--accent);border-color:var(--accent);color:#04211d}
+  .task.done .txt{color:var(--muted);text-decoration:line-through}
+  .task .del{margin-left:auto;color:var(--muted);font-size:16px;padding:0 4px}
+  .addtask{display:flex;gap:8px;margin-top:8px}
+  .addtask input{padding:10px;font-size:14px}
+  .addtask button{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:0 14px;font-weight:700}
+  .toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-120px);background:var(--card2);border:1px solid var(--accent);padding:12px 18px;border-radius:12px;font-weight:600;transition:transform .3s;z-index:9;max-width:90%;text-align:center}
+  .toast.show{transform:translateX(-50%) translateY(0)}
+  .row{display:flex;gap:10px}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+
+<!-- HOME -->
+<main class="wrap" id="view-home">
+  <header class="top">
+    <div class="logo"><div class="dot"></div>Life</div>
+    <span class="muted small" id="today-label"></span>
+  </header>
+  <div class="summary">
+    <div class="stat"><b id="s-goals">0</b><span>Active goals</span></div>
+    <div class="stat"><b id="s-week">0</b><span>Tasks this week</span></div>
+    <div class="stat"><b id="s-avg">0%</b><span>Avg. progress</span></div>
+  </div>
+  <h2>Your goals</h2>
+  <div id="goal-list"></div>
+  <button class="btn fab" onclick="openNew()">+ New goal</button>
+</main>
+
+<!-- NEW GOAL -->
+<main class="wrap hidden" id="view-new">
+  <header class="top">
+    <button class="icon-btn" onclick="show('home')">←</button>
+    <b>New goal</b><span style="width:40px"></span>
+  </header>
+
+  <label class="lbl">What do you want to achieve?</label>
+  <input id="g-name" placeholder="e.g. run, save money, learn Spanish…" autocomplete="off">
+  <div id="sugg-box"></div>
+
+  <label class="lbl">Start date</label>
+  <input type="date" id="g-start">
+
+  <label class="lbl">Choose your level</label>
+  <div class="levels" id="levels"></div>
+
+  <label class="lbl">Timeline preview</label>
+  <div class="card preview"><ul id="preview"></ul></div>
+
+  <div style="height:18px"></div>
+  <button class="btn" id="create-btn" onclick="createGoal()" disabled>Create goal</button>
+</main>
+
+<!-- DETAIL -->
+<main class="wrap hidden" id="view-detail">
+  <header class="top">
+    <button class="icon-btn" onclick="show('home')">←</button>
+    <b>Goal</b><span style="width:40px"></span>
+  </header>
+  <div id="detail"></div>
+</main>
+
+<script>
+/* ---------------- Goal templates ---------------- */
+const TEMPLATES = [
+  { id:'run', emoji:'🏃', keys:['run','running','marathon','5k','10k','jog','race','sprint'],
+    suggestions:['Run a 5K','Run a 10K','Run a half marathon','Run 3 times a week','Beat my 5K time'],
+    weeks:10,
+    phases:[
+      {name:'Foundation', tasks:['Get proper running shoes','Walk/run for 20 minutes','Stretch for 10 minutes','Do 3 easy runs this week','Plan your running route']},
+      {name:'Build endurance', tasks:['Run 30 minutes non-stop','Add one longer run (+10%)','Track your pace in an app','Do a strength session (legs + core)','Rest day: foam roll and stretch']},
+      {name:'Speed & strength', tasks:['Interval run: 6×400m','Tempo run 20 minutes','Hill repeats ×6','Long run at easy pace','Hydration check on long run']},
+      {name:'Race ready', tasks:['Test run at goal distance pace','Taper: reduce volume 30%','Prepare race-day kit','Sleep 8h for 3 nights','Do the run! 🎉']}
+    ]},
+  { id:'fit', emoji:'💪', keys:['weight','lose','fit','gym','muscle','strong','abs','fat','workout','exercise','body','push'],
+    suggestions:['Lose 5 kg','Go to the gym 3x a week','Do 20 push-ups in a row','Build muscle','Get a six-pack'],
+    weeks:12,
+    phases:[
+      {name:'Set the base', tasks:['Take starting measurements & photo','Plan 3 workouts this week','Drink 2L of water daily','Prep healthy lunches for 3 days','Walk 7,000 steps a day']},
+      {name:'Build the habit', tasks:['Complete 3 full-body workouts','Add 5 min of core work to each session','Cut sugary drinks this week','Log your meals for 5 days','Sleep 7+ hours 5 nights']},
+      {name:'Push harder', tasks:['Increase weights or reps by 10%','Try a new workout class','Do one cardio HIIT session','Cook 5 healthy dinners','Check measurements vs start']},
+      {name:'Lock it in', tasks:['Hit a personal best','Plan next month of training','Take progress photo','Reward yourself (non-food)','Celebrate the result 🎉']}
+    ]},
+  { id:'money', emoji:'💰', keys:['save','money','saving','debt','budget','invest','dollar','$','rich','finance','house','deposit'],
+    suggestions:['Save $1,000','Build an emergency fund','Pay off my credit card','Start investing','Save for a holiday'],
+    weeks:12,
+    phases:[
+      {name:'Know your numbers', tasks:['List all monthly income','List all fixed expenses','Track every purchase this week','Set your savings target','Open a separate savings account']},
+      {name:'Cut & automate', tasks:['Cancel 1 unused subscription','Set up an automatic weekly transfer','Cook at home 5 days','Do a no-spend weekend','Compare phone/energy plans']},
+      {name:'Grow it', tasks:['Sell 3 things you don\'t use','Find one extra income idea','Review spending vs budget','Increase auto-transfer slightly','Read one article about investing']},
+      {name:'Reach the target', tasks:['Check balance vs goal','Plan your next money goal','Move savings to high-interest account','Celebrate (on budget!) 🎉']}
+    ]},
+  { id:'lang', emoji:'🗣️', keys:['learn','language','spanish','french','english','german','italian','japanese','chinese','korean','portuguese','speak','fluent'],
+    suggestions:['Learn Spanish basics','Hold a 5-min conversation','Learn 500 new words','Pass a language exam','Watch a movie without subtitles'],
+    weeks:16,
+    phases:[
+      {name:'Basics', tasks:['Pick an app or course','Learn greetings & introductions','Learn 50 common words','Practice 15 minutes daily','Learn numbers 1–100']},
+      {name:'Build vocabulary', tasks:['Learn 100 new words','Study present tense verbs','Listen to a beginner podcast','Write 5 sentences about your day','Use flashcards daily']},
+      {name:'Speak it', tasks:['Book a session with a tutor or partner','Record yourself speaking 2 min','Learn past tense','Watch a show with subtitles','Read a short article']},
+      {name:'Real use', tasks:['Have a 5-min conversation','Write a short paragraph','Watch a movie in the language','Take a level test','Celebrate 🎉']}
+    ]},
+  { id:'read', emoji:'📚', keys:['read','book','books','novel','reading','library'],
+    suggestions:['Read 12 books this year','Read 20 pages a day','Finish a book a month','Read before bed every night'],
+    weeks:8,
+    phases:[
+      {name:'Get started', tasks:['Choose your first 3 books','Set a daily reading time','Read 10 pages a day','Put your phone away while reading']},
+      {name:'Keep the rhythm', tasks:['Read 20 pages a day','Finish your first book','Write 3 notes on what you learned','Join a reading community']},
+      {name:'Go further', tasks:['Try a new genre','Read 30 minutes a day','Finish your second book','Recommend a book to a friend','Celebrate 🎉']}
+    ]},
+  { id:'code', emoji:'💻', keys:['code','coding','program','programming','app','developer','python','javascript','web','website','software','html'],
+    suggestions:['Build my first app','Learn JavaScript','Learn Python','Make a portfolio website','Get a developer job'],
+    weeks:12,
+    phases:[
+      {name:'Fundamentals', tasks:['Pick one language and course','Set up your code editor','Learn variables & data types','Code 30 minutes daily','Learn loops and conditions']},
+      {name:'Small projects', tasks:['Build a calculator','Learn functions','Push your code to GitHub','Build a to-do list app','Fix 3 bugs on your own']},
+      {name:'Real project', tasks:['Plan your main project','Build the core feature','Ask for feedback','Add one extra feature','Write a README']},
+      {name:'Ship it', tasks:['Deploy your project online','Share it with friends','Add it to your portfolio','Plan your next project 🎉']}
+    ]},
+  { id:'music', emoji:'🎸', keys:['guitar','piano','music','sing','drum','drums','instrument','song','ukulele','violin'],
+    suggestions:['Play my first song','Learn guitar chords','Play piano with both hands','Write my own song'],
+    weeks:10,
+    phases:[
+      {name:'Basics', tasks:['Get/tune your instrument','Learn posture and basic technique','Practice 15 min daily','Learn 3 basic chords/notes']},
+      {name:'Practice', tasks:['Switch chords smoothly','Learn a simple rhythm','Practice with a metronome','Learn a full easy song']},
+      {name:'Perform', tasks:['Record yourself playing','Learn a song you love','Play for a friend','Celebrate 🎉']}
+    ]},
+  { id:'mind', emoji:'🧘', keys:['meditat','sleep','stress','calm','mind','mental','journal','anxiety','relax','happy','wake','morning','habit'],
+    suggestions:['Meditate every day','Sleep 8 hours a night','Wake up at 6am','Journal daily','Reduce screen time'],
+    weeks:6,
+    phases:[
+      {name:'Start small', tasks:['Pick a fixed time each day','Meditate/journal 5 minutes','No phone 30 min before bed','Notice how you feel each day']},
+      {name:'Grow the habit', tasks:['Increase to 10 minutes','Do it 6 of 7 days','Try a guided session','Write down 3 things you\'re grateful for']},
+      {name:'Make it yours', tasks:['Go for 15 minutes','Reflect on changes so far','Plan how to keep it going','Celebrate 🎉']}
+    ]},
+  { id:'study', emoji:'🎓', keys:['exam','study','test','pass','school','uni','university','degree','course','grade','certificate'],
+    suggestions:['Pass my exam','Get a better grade','Finish my online course','Get a certificate'],
+    weeks:8,
+    phases:[
+      {name:'Plan', tasks:['List all topics to cover','Make a study schedule','Gather notes and materials','Study 1 hour daily']},
+      {name:'Learn', tasks:['Cover 3 topics this week','Make summary notes','Use flashcards','Ask about anything unclear']},
+      {name:'Practice', tasks:['Do a past paper','Review weak topics','Teach a topic to someone','Do a timed practice test']},
+      {name:'Final push', tasks:['Light review only','Sleep well before the exam','Prepare everything the night before','Ace it 🎉']}
+    ]},
+  { id:'biz', emoji:'🚀', keys:['business','startup','company','sell','shop','brand','client','freelance','side hustle','money online','youtube','instagram','tiktok','channel'],
+    suggestions:['Start a side hustle','Get my first client','Launch an online shop','Grow to 1,000 followers'],
+    weeks:12,
+    phases:[
+      {name:'Idea', tasks:['Write down 5 business ideas','Pick one and define your customer','Research 3 competitors','Talk to 3 potential customers']},
+      {name:'Build', tasks:['Create a simple brand name/logo','Set up a page or profile','Make your first product/offer','Set your prices']},
+      {name:'Launch', tasks:['Announce it to friends & family','Post content 3 times this week','Reach out to 10 potential customers','Get your first sale/client']},
+      {name:'Grow', tasks:['Ask for a review/testimonial','Analyse what worked','Set next month\'s target','Celebrate 🎉']}
+    ]}
+];
+const GENERIC = { id:'gen', emoji:'🎯', weeks:8,
+  phases:[
+    {name:'Define', tasks:['Write down why this goal matters','Define what "done" looks like','Break it into 3 smaller milestones','Pick a fixed time to work on it']},
+    {name:'Start moving', tasks:['Complete milestone 1','Spend 30 minutes on it 3 times','Find a resource or mentor','Track what you did each day']},
+    {name:'Keep going', tasks:['Complete milestone 2','Review what\'s working','Remove one obstacle','Tell someone about your progress']},
+    {name:'Finish', tasks:['Complete milestone 3','Look back at how far you\'ve come','Plan what\'s next','Celebrate 🎉']}
+  ]};
+
+const LEVELS = {
+  easy:   {label:'Easy',   factor:1.5, perWeek:2, desc:'Relaxed pace, fewer tasks per week'},
+  medium: {label:'Medium', factor:1.0, perWeek:3, desc:'Balanced pace, steady progress'},
+  hard:   {label:'Hard',   factor:0.6, perWeek:4, desc:'Fast pace, more tasks per week'}
+};
+
+/* ---------------- Storage ---------------- */
+let goals = [];
+function load(){ try{ goals = JSON.parse(localStorage.getItem('life.goals')||'[]'); }catch(e){ goals=[]; } }
+function save(){ try{ localStorage.setItem('life.goals', JSON.stringify(goals)); }catch(e){} }
+
+/* ---------------- Helpers ---------------- */
+const $ = id => document.getElementById(id);
+const DAY = 86400000;
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = d => new Date(d).toLocaleDateString(undefined,{day:'numeric',month:'short'});
+const today0 = () => { const d=new Date(); d.setHours(0,0,0,0); return d.getTime(); };
+const isoToday = () => { const d=new Date(); return new Date(d - d.getTimezoneOffset()*60000).toISOString().slice(0,10); };
+function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),2200); }
+function show(v){ ['home','new','detail'].forEach(x=>$('view-'+x).classList.toggle('hidden', x!==v)); window.scrollTo(0,0); if(v==='home') renderHome(); }
+
+function matchTemplate(name){
+  const n = name.toLowerCase();
+  let best=null, score=0;
+  for(const t of TEMPLATES){
+    const s = t.keys.filter(k=>n.includes(k)).length;
+    if(s>score){score=s;best=t;}
+  }
+  return best;
+}
+
+function buildPlan(name, level, startISO){
+  const tpl = matchTemplate(name) || GENERIC;
+  const L = LEVELS[level];
+  const weeks = Math.max(2, Math.round(tpl.weeks * L.factor));
+  const start = new Date(startISO+'T00:00:00').getTime();
+  const plan = [];
+  const counters = tpl.phases.map(()=>0);
+  for(let w=0; w<weeks; w++){
+    const pi = Math.min(tpl.phases.length-1, Math.floor(w / weeks * tpl.phases.length));
+    const ph = tpl.phases[pi];
+    const isLast = w===weeks-1;
+    const tasks=[];
+    for(let k=0;k<L.perWeek;k++){
+      let txt = ph.tasks[counters[pi] % ph.tasks.length];
+      counters[pi]++;
+      if(tasks.some(t=>t.text===txt)) continue;
+      tasks.push({id:Math.random().toString(36).slice(2,9), text:txt, done:false});
+    }
+    if(isLast) tasks.push({id:Math.random().toString(36).slice(2,9), text:'🏁 Reach your goal: '+name, done:false});
+    plan.push({week:w+1, phase:ph.name, start:start+w*7*DAY, end:start+(w*7+6)*DAY, tasks});
+  }
+  return {tpl, weeks, plan, start, end:start+(weeks*7-1)*DAY};
+}
+
+function stats(g){
+  const all = g.plan.flatMap(w=>w.tasks);
+  const done = all.filter(t=>t.done).length;
+  const pct = all.length ? Math.round(done/all.length*100) : 0;
+  const now = today0();
+  const span = g.end - g.start + DAY;
+  const timePct = Math.max(0, Math.min(100, Math.round((now - g.start + DAY)/span*100)));
+  const daysLeft = Math.max(0, Math.ceil((g.end - now)/DAY));
+  let status='ok', statusTxt='On track';
+  if(pct===100){status='done';statusTxt='Completed';}
+  else if(now < g.start){status='ahead';statusTxt='Starts '+fmt(g.start);}
+  else if(pct >= timePct+10){status='ahead';statusTxt='Ahead';}
+  else if(pct < timePct-15){status='behind';statusTxt='Behind';}
+  const cur = g.plan.find(w=>now>=w.start && now<=w.end+DAY-1);
+  return {total:all.length, done, pct, timePct, daysLeft, status, statusTxt, cur};
+}
+
+/* ---------------- Home ---------------- */
+function renderHome(){
+  $('today-label').textContent = new Date().toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short'});
+  const list = $('goal-list');
+  const active = goals.filter(g=>stats(g).pct<100);
+  $('s-goals').textContent = active.length;
+  $('s-week').textContent = goals.reduce((a,g)=>{const c=stats(g).cur; return a + (c? c.tasks.filter(t=>!t.done).length:0);},0);
+  $('s-avg').textContent = goals.length ? Math.round(goals.reduce((a,g)=>a+stats(g).pct,0)/goals.length)+'%' : '0%';
+  if(!goals.length){
+    list.innerHTML = `<div class="card empty"><div class="big">🎯</div><b>No goals yet</b><p class="muted small" style="margin-top:6px">Add your first goal and Life will build a step-by-step timeline for you.</p></div>`;
+    return;
+  }
+  list.innerHTML = goals.map(g=>{
+    const s = stats(g);
+    return `<div class="card goal" onclick="openDetail('${g.id}')">
+      <div class="emoji">${g.emoji}</div>
+      <div class="info">
+        <div class="name">${esc(g.name)}</div>
+        <div class="small muted" style="margin-top:2px"><span class="pill ${g.level}">${LEVELS[g.level].label}</span> &nbsp;<span class="pill ${s.status}">${s.statusTxt}</span></div>
+        <div class="bar"><i style="width:${s.pct}%"></i></div>
+        <div class="small muted" style="margin-top:6px">${s.pct}% · ${s.daysLeft} days left · ends ${fmt(g.end)}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ---------------- New goal ---------------- */
+let newLevel = null;
+function openNew(){
+  $('g-name').value=''; $('g-start').value=isoToday(); newLevel=null;
+  renderSuggestions(); renderLevels(); renderPreview();
+  show('new'); setTimeout(()=>$('g-name').focus(),100);
+}
+function renderSuggestions(){
+  const name = $('g-name').value.trim();
+  const box = $('sugg-box');
+  if(name.length<2){
+    const picks = ['Run a 5K','Save $1,000','Learn Spanish basics','Read 12 books this year','Build my first app','Meditate every day'];
+    box.innerHTML = `<div class="sugg-title">Popular goals</div><div class="chips">${picks.map(chip).join('')}</div>`;
+    return;
+  }
+  const tpl = matchTemplate(name);
+  let ideas = [];
+  if(tpl) ideas = tpl.suggestions.slice();
+  const cap = name.charAt(0).toUpperCase()+name.slice(1);
+  ideas.push(`Get better at ${name.toLowerCase()}`, `${cap} every week`, `Master ${name.toLowerCase()}`);
+  ideas = [...new Set(ideas)].filter(i=>i.toLowerCase()!==name.toLowerCase()).slice(0,7);
+  box.innerHTML = `<div class="sugg-title">${tpl? tpl.emoji+' Suggested goals' : '✨ Ideas based on your goal'}</div><div class="chips">${ideas.map(chip).join('')}</div>`;
+}
+function chip(t){ return `<button class="chip" onclick="pickSuggestion(this)">${esc(t)}</button>`; }
+function pickSuggestion(el){ $('g-name').value = el.textContent; onNameChange(); }
+function onNameChange(){ renderSuggestions(); renderLevels(); renderPreview(); }
+
+function renderLevels(){
+  const name = $('g-name').value.trim() || 'goal';
+  const start = $('g-start').value || isoToday();
+  $('levels').innerHTML = Object.entries(LEVELS).map(([k,L])=>{
+    const p = buildPlan(name,k,start);
+    return `<button class="level ${k} ${newLevel===k?'sel':''}" onclick="pickLevel('${k}')">
+      <div><div class="t" style="color:var(--${k})">${L.label}</div><div class="d">${L.desc}</div><div class="d">${L.perWeek} tasks/week</div></div>
+      <div class="w">${p.weeks} weeks<small>by ${fmt(p.end)}</small></div>
+    </button>`;
+  }).join('');
+}
+function pickLevel(k){ newLevel=k; renderLevels(); renderPreview(); }
+function renderPreview(){
+  const name = $('g-name').value.trim();
+  const ok = name.length>=2 && newLevel;
+  $('create-btn').disabled = !ok;
+  if(!ok){ $('preview').innerHTML = `<li class="muted">Enter a goal and choose a level to see your timeline.</li>`; return; }
+  const p = buildPlan(name,newLevel,$('g-start').value||isoToday());
+  const phases = [];
+  p.plan.forEach(w=>{ const last=phases[phases.length-1]; if(last&&last.name===w.phase){last.to=w.week;last.end=w.end;} else phases.push({name:w.phase,from:w.week,to:w.week,start:w.start,end:w.end}); });
+  $('preview').innerHTML = phases.map(ph=>`<li><span><b>${esc(ph.name)}</b> <span class="muted">· week ${ph.from}${ph.to!==ph.from?'–'+ph.to:''}</span></span><span class="muted">${fmt(ph.start)}</span></li>`).join('')
+    + `<li><span><b>🏁 Goal reached</b></span><span class="muted">${fmt(p.end)}</span></li>`;
+}
+function createGoal(){
+  const name = $('g-name').value.trim();
+  if(name.length<2 || !newLevel) return;
+  const p = buildPlan(name,newLevel,$('g-start').value||isoToday());
+  const g = {id:Date.now().toString(36), name, level:newLevel, emoji:p.tpl.emoji, start:p.start, end:p.end, plan:p.plan, created:Date.now()};
+  goals.unshift(g); save();
+  toast('Goal created! '+p.weeks+' weeks to go 💪');
+  openDetail(g.id);
+}
+
+/* ---------------- Detail ---------------- */
+let currentId=null;
+function openDetail(id){ currentId=id; renderDetail(); show('detail');
+  setTimeout(()=>{ const c=document.querySelector('.week.current'); if(c) c.scrollIntoView({behavior:'smooth',block:'center'}); },250);
+}
+function renderDetail(){
+  const g = goals.find(x=>x.id===currentId); if(!g){show('home');return;}
+  const s = stats(g);
+  const C = 2*Math.PI*42;
+  const now = today0();
+  $('detail').innerHTML = `
+    <div class="detail-head">
+      <div class="ring">
+        <svg width="96" height="96"><circle cx="48" cy="48" r="42" stroke="#1c2330" stroke-width="10" fill="none"/>
+        <circle cx="48" cy="48" r="42" stroke="url(#gr)" stroke-width="10" fill="none" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-s.pct/100)}" style="transition:stroke-dashoffset .5s"/>
+        <defs><linearGradient id="gr"><stop offset="0" stop-color="#5eead4"/><stop offset="1" stop-color="#38bdf8"/></linearGradient></defs></svg>
+        <div class="pct">${s.pct}%</div>
+      </div>
+      <div style="min-width:0">
+        <div style="font-size:26px">${g.emoji}</div>
+        <h2 style="margin:2px 0 6px">${esc(g.name)}</h2>
+        <span class="pill ${g.level}">${LEVELS[g.level].label}</span> <span class="pill ${s.status}">${s.statusTxt}</span>
+      </div>
+    </div>
+    <div class="meta">
+      <div><b>${s.done}/${s.total}</b><span>Tasks done</span></div>
+      <div><b>${s.daysLeft}</b><span>Days left</span></div>
+      <div><b>${g.plan.length}</b><span>Weeks</span></div>
+    </div>
+    <div class="paceline">
+      <div class="small muted" style="margin-bottom:8px">Progress vs. time</div>
+      <div class="track"><div class="fill" style="width:${s.pct}%"></div><div class="today" style="left:calc(${s.timePct}% - 1px)"></div></div>
+      <div class="legend"><span>${fmt(g.start)}</span><span>▮ today (${s.timePct}% of time)</span><span>${fmt(g.end)}</span></div>
+    </div>
+    <h2>Timeline</h2>
+    <div class="timeline">
+      ${g.plan.map((w,wi)=>{
+        const wd = w.tasks.length && w.tasks.every(t=>t.done);
+        const state = wd ? 'complete' : (now>=w.start && now<=w.end ? 'current' : (now>w.end ? 'past':'future'));
+        const wdone = w.tasks.filter(t=>t.done).length;
+        return `<div class="week ${state}${state==='current'&&wd?' current':''}">
+          <div class="node">${wd?'✓':''}</div>
+          <div class="card">
+            <div class="whead"><span class="wtitle">Week ${w.week}${state==='current'?' · Now':''}</span><span class="small muted">${fmt(w.start)} – ${fmt(w.end)}</span></div>
+            <div class="phase">${esc(w.phase)} · ${wdone}/${w.tasks.length}</div>
+            ${w.tasks.map(t=>`<div class="task ${t.done?'done':''}" onclick="toggleTask(${wi},'${t.id}')">
+              <div class="box">${t.done?'✓':''}</div><div class="txt">${esc(t.text)}</div>
+              ${t.custom?`<button class="del" onclick="event.stopPropagation();delTask(${wi},'${t.id}')">✕</button>`:''}
+            </div>`).join('')}
+            <form class="addtask" onsubmit="event.preventDefault();addTask(${wi},this)">
+              <input placeholder="Add your own task…" maxlength="120"><button>+</button>
+            </form>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div style="height:20px"></div>
+    <button class="btn danger" onclick="deleteGoal()">Delete goal</button>`;
+}
+function toggleTask(wi,tid){
+  const g = goals.find(x=>x.id===currentId);
+  const t = g.plan[wi].tasks.find(t=>t.id===tid);
+  t.done=!t.done; save();
+  const s = stats(g);
+  if(t.done){
+    if(s.pct===100) toast('🎉 Goal complete! Amazing work!');
+    else if(g.plan[wi].tasks.every(t=>t.done)) toast('Week '+(wi+1)+' complete! 🔥');
+  }
+  const y = window.scrollY; renderDetail(); window.scrollTo(0,y);
+}
+function addTask(wi,form){
+  const v = form.querySelector('input').value.trim(); if(!v) return;
+  const g = goals.find(x=>x.id===currentId);
+  g.plan[wi].tasks.push({id:Math.random().toString(36).slice(2,9), text:v, done:false, custom:true});
+  save(); const y=window.scrollY; renderDetail(); window.scrollTo(0,y);
+}
+function delTask(wi,tid){
+  const g = goals.find(x=>x.id===currentId);
+  g.plan[wi].tasks = g.plan[wi].tasks.filter(t=>t.id!==tid);
+  save(); const y=window.scrollY; renderDetail(); window.scrollTo(0,y);
+}
+function deleteGoal(){
+  const b = event.target;
+  if(b.dataset.confirm){ goals = goals.filter(x=>x.id!==currentId); save(); toast('Goal deleted'); show('home'); return; }
+  b.dataset.confirm='1'; b.textContent='Tap again to confirm delete';
+  setTimeout(()=>{ if(b.isConnected){ delete b.dataset.confirm; b.textContent='Delete goal'; } },3000);
+}
+
+/* ---------------- Init ---------------- */
+$('g-name').addEventListener('input', onNameChange);
+$('g-start').addEventListener('change', ()=>{ renderLevels(); renderPreview(); });
+load(); renderHome();
+</script>
+</body>
+</html>
